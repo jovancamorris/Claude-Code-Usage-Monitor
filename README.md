@@ -12,10 +12,11 @@ A lightweight, open-source usage monitor for Claude Code limits and reset times.
 
 Recreated as a native Swift/SwiftUI **Menu Bar application** optimized for modern macOS (including macOS 14+ Sonoma, macOS 15 Sequoia, and macOS Golden Gate / Darwin 27):
 
+- **Multi-Provider Support:** Seamlessly switch between **Google Antigravity** (Gemini Models, Claude & GPT Models, Gemini 4 Argon) and **Claude Code**.
 - **Native Menu Bar Item:** Displays current 5-hour and 7-day usage percentages directly in your top status bar.
 - **Rich Dashboard:** Click the menu bar item to view progress bars, exact reset countdowns, on-demand spend, and account source.
-- **Keychain & CLI Integration:** Automatically reads OAuth credentials from macOS Keychain (`Claude Code-credentials`) or `~/.claude/.credentials.json`.
-- **Customizable:** Change polling intervals, toggle between "Used" and "Remaining" display directions, or provide a manual token override.
+- **Automatic Authentication:** Reads OAuth credentials automatically from Google Antigravity (`~/.gemini/jetski-standalone-oauth-token` with automatic Google token refresh) and macOS Keychain (`Claude Code-credentials`) / `~/.claude/.credentials.json`.
+- **Customizable:** Change polling intervals, toggle between "Used" and "Remaining" display directions, switch default providers, or provide manual token overrides.
 - **Demo Mode:** Easily preview widgets and layout even without active credentials.
 
 ### Installation (macOS .DMG)

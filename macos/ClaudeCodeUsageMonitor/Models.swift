@@ -1,6 +1,27 @@
 import Foundation
 
-public enum MonitorStatus: Equatable {
+public enum ProviderType: String, CaseIterable, Identifiable, Sendable {
+    case antigravity = "Google Antigravity"
+    case claude = "Claude Code"
+    
+    public var id: String { rawValue }
+    
+    public var icon: String {
+        switch self {
+        case .antigravity: return "sparkles"
+        case .claude: return "cpu.fill"
+        }
+    }
+    
+    public var shortName: String {
+        switch self {
+        case .antigravity: return "AGY"
+        case .claude: return "Claude"
+        }
+    }
+}
+
+public enum MonitorStatus: Equatable, Sendable {
     case idle
     case loading
     case success
@@ -28,15 +49,15 @@ public enum DisplayDirection: String, CaseIterable, Identifiable {
 }
 
 public enum MenuBarDisplayMode: String, CaseIterable, Identifiable {
-    case full = "Full (5h & 7d)"
+    case full = "Full Details"
     case compact = "Compact (5h only)"
     case iconOnly = "Icon Only"
     
     public var id: String { rawValue }
 }
 
-public struct UsageBucket: Equatable {
-    public var utilization: Double // Normalized 0.0 ... 1.0
+public struct UsageBucket: Equatable, Sendable {
+    public var utilization: Double // Normalized 0.0 ... 1.0 (used fraction)
     public var resetsAt: Date?
     public var rawResetsAt: String?
     
@@ -79,7 +100,7 @@ public struct UsageBucket: Equatable {
     }
 }
 
-public struct SpendBucket: Equatable {
+public struct SpendBucket: Equatable, Sendable {
     public var enabled: Bool
     public var usedMinor: Double
     public var limitMinor: Double
@@ -109,7 +130,7 @@ public struct SpendBucket: Equatable {
     }
 }
 
-public struct UsageData: Equatable {
+public struct UsageData: Equatable, Sendable {
     public var fiveHour: UsageBucket?
     public var sevenDay: UsageBucket?
     public var spend: SpendBucket?
@@ -131,5 +152,42 @@ public struct UsageData: Equatable {
         self.lastUpdated = lastUpdated
         self.status = status
         self.credentialSource = credentialSource
+    }
+}
+
+public struct AntigravityGroupQuota: Equatable, Identifiable, Sendable {
+    public var id: String { displayName }
+    public let displayName: String
+    public let iconName: String
+    public var fiveHour: UsageBucket?
+    public var weekly: UsageBucket?
+    
+    public init(displayName: String, iconName: String, fiveHour: UsageBucket? = nil, weekly: UsageBucket? = nil) {
+        self.displayName = displayName
+        self.iconName = iconName
+        self.fiveHour = fiveHour
+        self.weekly = weekly
+    }
+}
+
+public struct AntigravityUsageData: Equatable, Sendable {
+    public var groups: [AntigravityGroupQuota] = []
+    public var lastUpdated: Date?
+    public var status: MonitorStatus = .idle
+    public var credentialSource: String = "Detecting..."
+    public var project: String? = nil
+    
+    public init(
+        groups: [AntigravityGroupQuota] = [],
+        lastUpdated: Date? = nil,
+        status: MonitorStatus = .idle,
+        credentialSource: String = "Detecting...",
+        project: String? = nil
+    ) {
+        self.groups = groups
+        self.lastUpdated = lastUpdated
+        self.status = status
+        self.credentialSource = credentialSource
+        self.project = project
     }
 }

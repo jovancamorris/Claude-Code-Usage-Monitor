@@ -24,20 +24,26 @@ public struct SettingsView: View {
             
             Divider()
             
-            // Section 1: Display
+            // Section 1: Provider & Display
             VStack(alignment: .leading, spacing: 12) {
-                Text("Display Options")
+                Text("General Settings")
                     .font(.system(size: 12, weight: .semibold))
                     .foregroundColor(.secondary)
                 
-                Picker("Direction", selection: $settings.displayDirection) {
+                Picker("Default Provider", selection: $settings.selectedProvider) {
+                    ForEach(ProviderType.allCases) { prov in
+                        Text(prov.rawValue).tag(prov)
+                    }
+                }
+                
+                Picker("Display Direction", selection: $settings.displayDirection) {
                     ForEach(DisplayDirection.allCases) { dir in
                         Text(dir.rawValue).tag(dir)
                     }
                 }
                 .pickerStyle(.segmented)
                 
-                Picker("Menu Bar Label", selection: $settings.menuBarDisplayMode) {
+                Picker("Menu Bar Format", selection: $settings.menuBarDisplayMode) {
                     ForEach(MenuBarDisplayMode.allCases) { mode in
                         Text(mode.rawValue).tag(mode)
                     }
@@ -54,9 +60,9 @@ public struct SettingsView: View {
             
             Divider()
             
-            // Section 2: Authentication Override
+            // Section 2: Claude Code Token Override
             VStack(alignment: .leading, spacing: 8) {
-                Text("Authentication Override")
+                Text("Claude Code Authentication Override")
                     .font(.system(size: 12, weight: .semibold))
                     .foregroundColor(.secondary)
                 
@@ -84,7 +90,7 @@ public struct SettingsView: View {
                 HStack {
                     Button("Apply Token") {
                         settings.customToken = tempToken
-                        poller.fetchUsage(settings: settings)
+                        poller.fetchAll(settings: settings)
                     }
                     .buttonStyle(.borderedProminent)
                     .controlSize(.small)
@@ -93,7 +99,7 @@ public struct SettingsView: View {
                         Button("Clear") {
                             tempToken = ""
                             settings.customToken = ""
-                            poller.fetchUsage(settings: settings)
+                            poller.fetchAll(settings: settings)
                         }
                         .buttonStyle(.bordered)
                         .controlSize(.small)
@@ -103,11 +109,23 @@ public struct SettingsView: View {
             
             Divider()
             
-            // Section 3: Demo Mode Toggle
+            // Section 3: Antigravity Note
+            VStack(alignment: .leading, spacing: 4) {
+                Text("Google Antigravity Setup")
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundColor(.secondary)
+                Text("Detected automatically from ~/.gemini/jetski-standalone-oauth-token with token auto-refresh via Google Cloud Code APIs.")
+                    .font(.system(size: 11))
+                    .foregroundColor(.secondary)
+            }
+            
+            Divider()
+            
+            // Section 4: Demo Mode Toggle
             HStack {
                 Toggle("Demo Mode (Simulate live metrics)", isOn: $settings.demoMode)
                     .onChange(of: settings.demoMode) {
-                        poller.fetchUsage(settings: settings)
+                        poller.fetchAll(settings: settings)
                     }
                 Spacer()
             }
@@ -116,7 +134,7 @@ public struct SettingsView: View {
             
             // About & Credits
             HStack {
-                Text("Claude Code Usage Monitor macOS v2.22.4")
+                Text("Usage Monitor for macOS v2.23.0")
                     .font(.system(size: 10))
                     .foregroundColor(.secondary)
                 Spacer()

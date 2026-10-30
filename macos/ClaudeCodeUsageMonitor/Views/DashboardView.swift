@@ -6,84 +6,35 @@ public struct DashboardView: View {
     @State private var showingSettings = false
     
     public var body: some View {
-        VStack(spacing: 14) {
+        VStack(spacing: 12) {
             // Header
             HStack(spacing: 8) {
-                Image(systemName: "cpu.fill")
-                    .font(.system(size: 16))
-                    .foregroundColor(.orange)
+                Image(systemName: settings.selectedProvider.icon)
+                    .font(.system(size: 15))
+                    .foregroundColor(settings.selectedProvider == .antigravity ? .blue : .orange)
                 
-                Text("Claude Code Monitor")
+                Text(settings.selectedProvider.rawValue)
                     .font(.system(size: 14, weight: .bold))
                 
                 Spacer()
                 
-                // Status pill
                 statusBadge
             }
             .padding(.bottom, 2)
             
-            // Error banner if any
-            if let error = poller.errorMessage {
-                VStack(alignment: .leading, spacing: 6) {
-                    HStack(alignment: .top) {
-                        Image(systemName: "exclamationmark.triangle.fill")
-                            .foregroundColor(.orange)
-                        Text(error)
-                            .font(.system(size: 11))
-                            .foregroundColor(.primary)
-                            .fixedSize(horizontal: false, vertical: true)
-                    }
-                    
-                    if !settings.demoMode && settings.customToken.isEmpty {
-                        Button("Enable Demo Mode") {
-                            settings.demoMode = true
-                            poller.fetchUsage(settings: settings)
-                        }
-                        .font(.system(size: 11, weight: .medium))
-                        .buttonStyle(.bordered)
-                        .controlSize(.mini)
-                    }
+            // Provider Segmented Switcher
+            Picker("Provider", selection: $settings.selectedProvider) {
+                ForEach(ProviderType.allCases) { prov in
+                    Text(prov.rawValue).tag(prov)
                 }
-                .padding(10)
-                .background(Color.orange.opacity(0.12))
-                .cornerRadius(8)
             }
+            .pickerStyle(.segmented)
             
-            // 5-Hour Limit Card
-            LimitCardView(
-                title: "5-Hour Session Window",
-                icon: "hourglass",
-                bucket: poller.usageData.fiveHour,
-                direction: settings.displayDirection
-            )
-            
-            // 7-Day Limit Card
-            LimitCardView(
-                title: "7-Day Weekly Window",
-                icon: "calendar",
-                bucket: poller.usageData.sevenDay,
-                direction: settings.displayDirection
-            )
-            
-            // Extra Spend Card (if enabled)
-            if let spend = poller.usageData.spend, spend.enabled {
-                HStack {
-                    VStack(alignment: .leading, spacing: 3) {
-                        Text("On-Demand Spend")
-                            .font(.system(size: 12, weight: .medium))
-                            .foregroundColor(.secondary)
-                        Text("\(spend.formattedUsed) / \(spend.formattedLimit)")
-                            .font(.system(size: 14, weight: .bold))
-                    }
-                    Spacer()
-                    Image(systemName: "creditcard.fill")
-                        .foregroundColor(.blue)
-                        .font(.system(size: 16))
-                }
-                .padding(10)
-                .background(Color(NSColor.controlBackgroundColor).opacity(0.8))
-                .cornerRadius(8)
+            // Provider Content
+            if settings.selectedProvider == .antigravity {
+                antigravityContent
+            } else {
+                claudeCodeContent
             }
             
             Divider()
@@ -96,7 +47,7 @@ public struct DashboardView: View {
                             .font(.system(size: 10))
                             .foregroundColor(.secondary)
                     }
-                    Text("Source: \(poller.usageData.credentialSource)")
+                    Text(sourceText)
                         .font(.system(size: 10))
                         .foregroundColor(.secondary)
                         .lineLimit(1)
@@ -104,10 +55,9 @@ public struct DashboardView: View {
                 
                 Spacer()
                 
-                // Action Buttons
                 HStack(spacing: 6) {
                     Button {
-                        poller.fetchUsage(settings: settings)
+                        poller.fetchAll(settings: settings)
                     } label: {
                         if poller.isLoading {
                             ProgressView()
@@ -141,11 +91,124 @@ public struct DashboardView: View {
             }
         }
         .padding(14)
-        .frame(width: 320)
+        .frame(width: 330)
         .sheet(isPresented: $showingSettings) {
             SettingsView()
                 .environmentObject(settings)
                 .environmentObject(poller)
+        }
+    }
+    
+    // MARK: - Antigravity Content
+    @ViewBuilder
+    private var antigravityContent: some View {
+        if case .error(let msg) = poller.antigravityData.status {
+            VStack(alignment: .leading, spacing: 6) {
+                HStack(alignment: .top) {
+                    Image(systemName: "exclamationmark.triangle.fill")
+                        .foregroundColor(.orange)
+                    Text(msg)
+                        .font(.system(size: 11))
+                        .foregroundColor(.primary)
+                }
+                if !settings.demoMode {
+                    Button("Enable Demo Mode") {
+                        settings.demoMode = true
+                        poller.fetchAll(settings: settings)
+                    }
+                    .font(.system(size: 11, weight: .medium))
+                    .buttonStyle(.bordered)
+                    .controlSize(.mini)
+                }
+            }
+            .padding(10)
+            .background(Color.orange.opacity(0.12))
+            .cornerRadius(8)
+        }
+        
+        if poller.antigravityData.groups.isEmpty && !poller.isLoading {
+            Text("No quota information available yet.")
+                .font(.system(size: 12))
+                .foregroundColor(.secondary)
+                .padding(.vertical, 8)
+        } else {
+            VStack(spacing: 10) {
+                ForEach(poller.antigravityData.groups) { group in
+                    AntigravityGroupCardView(group: group, direction: settings.displayDirection)
+                }
+            }
+        }
+    }
+    
+    // MARK: - Claude Code Content
+    @ViewBuilder
+    private var claudeCodeContent: some View {
+        if case .error(let msg) = poller.usageData.status {
+            VStack(alignment: .leading, spacing: 6) {
+                HStack(alignment: .top) {
+                    Image(systemName: "exclamationmark.triangle.fill")
+                        .foregroundColor(.orange)
+                    Text(msg)
+                        .font(.system(size: 11))
+                        .foregroundColor(.primary)
+                }
+                if !settings.demoMode && settings.customToken.isEmpty {
+                    Button("Enable Demo Mode") {
+                        settings.demoMode = true
+                        poller.fetchAll(settings: settings)
+                    }
+                    .font(.system(size: 11, weight: .medium))
+                    .buttonStyle(.bordered)
+                    .controlSize(.mini)
+                }
+            }
+            .padding(10)
+            .background(Color.orange.opacity(0.12))
+            .cornerRadius(8)
+        }
+        
+        LimitCardView(
+            title: "5-Hour Session Window",
+            icon: "hourglass",
+            bucket: poller.usageData.fiveHour,
+            direction: settings.displayDirection
+        )
+        
+        LimitCardView(
+            title: "7-Day Weekly Window",
+            icon: "calendar",
+            bucket: poller.usageData.sevenDay,
+            direction: settings.displayDirection
+        )
+        
+        if let spend = poller.usageData.spend, spend.enabled {
+            HStack {
+                VStack(alignment: .leading, spacing: 3) {
+                    Text("On-Demand Spend")
+                        .font(.system(size: 12, weight: .medium))
+                        .foregroundColor(.secondary)
+                    Text("\(spend.formattedUsed) / \(spend.formattedLimit)")
+                        .font(.system(size: 14, weight: .bold))
+                }
+                Spacer()
+                Image(systemName: "creditcard.fill")
+                    .foregroundColor(.blue)
+                    .font(.system(size: 16))
+            }
+            .padding(10)
+            .background(Color(NSColor.controlBackgroundColor).opacity(0.8))
+            .cornerRadius(8)
+        }
+    }
+    
+    private var sourceText: String {
+        if settings.selectedProvider == .antigravity {
+            if let proj = poller.antigravityData.project {
+                return "Project: \(proj)"
+            }
+            return "Source: \(poller.antigravityData.credentialSource)"
+        } else {
+            return "Source: \(poller.usageData.credentialSource)"
         }
     }
     
@@ -166,34 +229,24 @@ public struct DashboardView: View {
     }
     
     private var statusColor: Color {
-        if poller.isLoading {
-            return .blue
-        }
-        switch poller.usageData.status {
-        case .success:
-            return .green
-        case .loading:
-            return .blue
-        case .error:
-            return .red
-        case .idle:
-            return .gray
+        if poller.isLoading { return .blue }
+        let status = settings.selectedProvider == .antigravity ? poller.antigravityData.status : poller.usageData.status
+        switch status {
+        case .success: return .green
+        case .loading: return .blue
+        case .error: return .red
+        case .idle: return .gray
         }
     }
     
     private var statusLabel: String {
-        if poller.isLoading {
-            return "Updating"
-        }
-        switch poller.usageData.status {
-        case .success:
-            return "Active"
-        case .loading:
-            return "Updating"
-        case .error:
-            return "Error"
-        case .idle:
-            return "Idle"
+        if poller.isLoading { return "Updating" }
+        let status = settings.selectedProvider == .antigravity ? poller.antigravityData.status : poller.usageData.status
+        switch status {
+        case .success: return "Active"
+        case .loading: return "Updating"
+        case .error: return "Error"
+        case .idle: return "Idle"
         }
     }
     

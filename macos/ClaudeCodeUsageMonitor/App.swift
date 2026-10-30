@@ -15,7 +15,7 @@ struct ClaudeCodeUsageMonitorApp: App {
                 }
         } label: {
             HStack(spacing: 4) {
-                Image(systemName: "gauge.with.needle.fill")
+                Image(systemName: settings.selectedProvider.icon)
                 let text = poller.menuBarText(settings: settings)
                 if !text.isEmpty {
                     Text(text)

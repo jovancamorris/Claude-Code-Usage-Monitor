@@ -4,6 +4,12 @@ import ServiceManagement
 
 @MainActor
 public final class SettingsManager: ObservableObject, @unchecked Sendable {
+    @Published public var selectedProvider: ProviderType {
+        didSet {
+            UserDefaults.standard.set(selectedProvider.rawValue, forKey: "selectedProvider")
+        }
+    }
+    
     @Published public var refreshInterval: TimeInterval {
         didSet {
             UserDefaults.standard.set(refreshInterval, forKey: "refreshInterval")
@@ -35,6 +41,20 @@ public final class SettingsManager: ObservableObject, @unchecked Sendable {
     }
     
     public init() {
+        let savedProvider = UserDefaults.standard.string(forKey: "selectedProvider")
+        if let saved = savedProvider, let prov = ProviderType(rawValue: saved) {
+            self.selectedProvider = prov
+        } else {
+            // Check if Antigravity token exists locally
+            let home = FileManager.default.homeDirectoryForCurrentUser
+            let agyToken = home.appendingPathComponent(".gemini/jetski-standalone-oauth-token")
+            if FileManager.default.fileExists(atPath: agyToken.path) {
+                self.selectedProvider = .antigravity
+            } else {
+                self.selectedProvider = .claude
+            }
+        }
+        
         let interval = UserDefaults.standard.double(forKey: "refreshInterval")
         self.refreshInterval = interval > 0 ? interval : 900.0 // Default 15 minutes
         

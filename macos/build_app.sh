@@ -27,10 +27,12 @@ swiftc -parse-as-library \
     App.swift \
     Models.swift \
     CredentialManager.swift \
+    AntigravityService.swift \
     SettingsManager.swift \
     UsagePoller.swift \
     Views/ProgressBarView.swift \
     Views/LimitCardView.swift \
+    Views/AntigravityGroupCardView.swift \
     Views/DashboardView.swift \
     Views/SettingsView.swift \
     -o "$APP_BUNDLE/Contents/MacOS/ClaudeCodeUsageMonitor"
