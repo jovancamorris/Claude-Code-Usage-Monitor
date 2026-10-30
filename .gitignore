@@ -35,3 +35,5 @@ test_bin/
 # Local dev builds and scratch
 /builds/
 /scratch/
+/macos/build/
+/macos/dist/

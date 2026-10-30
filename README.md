@@ -1,9 +1,46 @@
 # Claude Code Usage Monitor
 
-![Windows](https://img.shields.io/badge/platform-Windows-blue)
+![macOS](https://img.shields.io/badge/platform-macOS-black?logo=apple&logoColor=white)
+![Windows](https://img.shields.io/badge/platform-Windows-blue?logo=windows&logoColor=white)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-A lightweight, open-source Windows taskbar widget for monitoring Claude Code usage limits and reset times. It can also display usage for Codex, Google Antigravity, OpenCode Go, Cursor, Grok Build, and GitHub Copilot.
+A lightweight, open-source usage monitor for Claude Code limits and reset times. Supports **macOS** (as a native Menu Bar application with `.dmg` installer) and **Windows** (as a taskbar widget).
+
+---
+
+## 🍎 macOS Edition (Apple Silicon & Intel)
+
+Recreated as a native Swift/SwiftUI **Menu Bar application** optimized for modern macOS (including macOS 14+ Sonoma, macOS 15 Sequoia, and macOS Golden Gate / Darwin 27):
+
+- **Native Menu Bar Item:** Displays current 5-hour and 7-day usage percentages directly in your top status bar.
+- **Rich Dashboard:** Click the menu bar item to view progress bars, exact reset countdowns, on-demand spend, and account source.
+- **Keychain & CLI Integration:** Automatically reads OAuth credentials from macOS Keychain (`Claude Code-credentials`) or `~/.claude/.credentials.json`.
+- **Customizable:** Change polling intervals, toggle between "Used" and "Remaining" display directions, or provide a manual token override.
+- **Demo Mode:** Easily preview widgets and layout even without active credentials.
+
+### Installation (macOS .DMG)
+
+1. Download `Claude-Code-Usage-Monitor-macOS.dmg` from [Releases](https://github.com/jovancamorris/Claude-Code-Usage-Monitor/releases) or build it locally.
+2. Open the `.dmg` file and drag `Claude Code Usage Monitor.app` into your **Applications** folder.
+3. Launch the app. The gauge icon will appear in your Menu Bar.
+
+### Build from Source (macOS)
+
+No external dependencies or Rust toolchain required on macOS — uses the built-in Apple Swift compiler:
+
+```bash
+# Build the .app bundle and .dmg package
+./build-dmg.sh
+
+# Or using Make
+make dmg
+```
+
+The resulting disk image is created at `macos/dist/Claude-Code-Usage-Monitor-macOS.dmg`.
+
+---
+
+## 🪟 Windows Edition
 
 See the [user guide](USER_GUIDE.md) for theme customisation and everyday settings,
 or the [changelog](CHANGELOG.md) for version history and notable changes.
