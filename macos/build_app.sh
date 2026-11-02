@@ -28,6 +28,7 @@ swiftc -parse-as-library \
     Models.swift \
     CredentialManager.swift \
     AntigravityService.swift \
+    LaunchAtLoginHelper.swift \
     SettingsManager.swift \
     UsagePoller.swift \
     Views/ProgressBarView.swift \

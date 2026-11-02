@@ -40,6 +40,13 @@ public final class SettingsManager: ObservableObject, @unchecked Sendable {
         }
     }
     
+    @Published public var launchAtLogin: Bool {
+        didSet {
+            UserDefaults.standard.set(launchAtLogin, forKey: "launchAtLogin")
+            LaunchAtLoginHelper.setEnabled(launchAtLogin)
+        }
+    }
+    
     public init() {
         let savedProvider = UserDefaults.standard.string(forKey: "selectedProvider")
         if let saved = savedProvider, let prov = ProviderType(rawValue: saved) {
@@ -66,5 +73,15 @@ public final class SettingsManager: ObservableObject, @unchecked Sendable {
         
         self.customToken = UserDefaults.standard.string(forKey: "customToken") ?? ""
         self.demoMode = UserDefaults.standard.bool(forKey: "demoMode")
+        
+        // Check Launch at Login setting
+        if UserDefaults.standard.object(forKey: "launchAtLogin") != nil {
+            self.launchAtLogin = UserDefaults.standard.bool(forKey: "launchAtLogin")
+        } else {
+            // Default to true for persistent Menu Bar monitor
+            self.launchAtLogin = true
+            UserDefaults.standard.set(true, forKey: "launchAtLogin")
+            LaunchAtLoginHelper.setEnabled(true)
+        }
     }
 }

@@ -60,7 +60,23 @@ public struct SettingsView: View {
             
             Divider()
             
-            // Section 2: Claude Code Token Override
+            // Section 2: Launch at Login (Auto-Start)
+            VStack(alignment: .leading, spacing: 6) {
+                Text("Startup & Background")
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundColor(.secondary)
+                
+                Toggle("Launch at Login (Buka otomatis saat Mac dinyalakan)", isOn: $settings.launchAtLogin)
+                    .font(.system(size: 12))
+                
+                Text("Aplikasi akan otomatis berjalan di Menu Bar atas setiap kali Mac dibuka atau dinyalakan.")
+                    .font(.system(size: 11))
+                    .foregroundColor(.secondary)
+            }
+            
+            Divider()
+            
+            // Section 3: Claude Code Token Override
             VStack(alignment: .leading, spacing: 8) {
                 Text("Claude Code Authentication Override")
                     .font(.system(size: 12, weight: .semibold))
@@ -109,7 +125,7 @@ public struct SettingsView: View {
             
             Divider()
             
-            // Section 3: Antigravity Note
+            // Section 4: Antigravity Note
             VStack(alignment: .leading, spacing: 4) {
                 Text("Google Antigravity Setup")
                     .font(.system(size: 12, weight: .semibold))
@@ -121,7 +137,7 @@ public struct SettingsView: View {
             
             Divider()
             
-            // Section 4: Demo Mode Toggle
+            // Section 5: Demo Mode Toggle
             HStack {
                 Toggle("Demo Mode (Simulate live metrics)", isOn: $settings.demoMode)
                     .onChange(of: settings.demoMode) {
@@ -134,7 +150,7 @@ public struct SettingsView: View {
             
             // About & Credits
             HStack {
-                Text("Usage Monitor for macOS v2.23.0")
+                Text("Usage Monitor for macOS v2.23.1")
                     .font(.system(size: 10))
                     .foregroundColor(.secondary)
                 Spacer()
@@ -143,7 +159,7 @@ public struct SettingsView: View {
             }
         }
         .padding(18)
-        .frame(width: 360)
+        .frame(width: 370)
         .onAppear {
             tempToken = settings.customToken
         }
